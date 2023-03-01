@@ -1,0 +1,105 @@
+version: '3'
+
+networks:
+  bris-network:
+    name: 'bris-network'
+
+volumes:
+  bris-postgres-volume:
+    external: true
+  bris-pgadmin-volume:
+    external: true
+
+services:
+  bris-postgres:
+    container_name: bris-postgres
+    image: postgres:13.3
+
+    environment:
+      POSTGRES_DB: ${PSQL_DATABASE}
+      POSTGRES_USER: ${PSQL_USERNAME}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+      PGDATA: '/var/lib/postgresql/data/pgdata'
+    volumes:
+      - bris-postgres-volume:/var/lib/postgresql/data
+    ports:
+      - '${PSQL_PORT}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${PSQL_USERNAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - bris-network
+
+  bris-pgadmin:
+    container_name: bris-pgadmin
+    image: dpage/pgadmin4:5.7
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'admin@pg.com'
+      PGADMIN_DEFAULT_PASSWORD: 'root'
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - bris-pgadmin-volume:/var/lib/pgadmin
+    ports:
+      - '5050:80'
+    restart: unless-stopped
+    depends_on:
+      - bris-postgres
+    networks:
+      - bris-network
+
+  bris-nginx:
+    image: nginx:alpine
+    container_name: bris-nginx
+    ports:
+      - 9090:9090
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./logs:/var/log/nginx/
+    networks:
+      - bris-network
+    depends_on:
+      bris-server:
+        condition: service_started
+      bris-client:
+        condition: service_started
+
+  bris-server:
+    container_name: bris-server
+    image: node:16-alpine
+    user: ${CURRENT_UID}
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      SERVER_HOST: ${SERVER_HOST}
+      SERVER_PORT: ${SERVER_PORT}
+      PSQL_URL: ${PSQL_URL}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    working_dir: '/app'
+    volumes:
+      - ./../../../:/app
+    command: 'npm run serve:server'
+    tty: true
+    depends_on:
+      - bris-postgres
+    networks:
+      - bris-network
+
+  bris-client:
+    container_name: bris-client
+    image: node:16-alpine
+    user: ${CURRENT_UID}
+    ports:
+      - 4200:4200
+    working_dir: '/app'
+    volumes:
+      - ./../../../:/app
+    command: 'npm run serve:client'
+    tty: true
+    depends_on:
+      bris-server:
+        condition: service_started
+    networks:
+      - bris-network

@@ -23,3 +23,80 @@ model migrations {
   @@index([success], map: "__migrations_s_idx")
   @@map("__migrations")
 }
+
+model articles {
+  id             String      @id(map: "PK_ARTICLES") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title          String      @db.VarChar(50)
+  description    String      @default("")
+  body           String      @default("")
+  favoritesCount Int         @default(0)
+  authorId       String?     @db.Uuid
+  createdAt      DateTime    @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime    @default(now()) @db.Timestamp(6)
+  users          users?      @relation(fields: [authorId], references: [id], onUpdate: NoAction, map: "FK_ARTICLES__AUTHOR_ID")
+  favorites      favorites[]
+
+  @@index([title], map: "IDX_ARTICLES__TITLE")
+}
+
+model favorites {
+  userId    String   @db.Uuid
+  articleId String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+  articles  articles @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_FAVORITES__ARTICLE_ID")
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_FAVORITES__USER_ID")
+
+  @@id([userId, articleId], map: "PK_FAVORITES")
+  @@index([articleId], map: "IDX_FAVORITES__ARTICLE_ID")
+  @@index([userId], map: "IDX_FAVORITES__USER_ID")
+}
+
+model follows {
+  followerId                       String   @db.Uuid
+  followingId                      String   @db.Uuid
+  createdAt                        DateTime @default(now()) @db.Timestamp(6)
+  updatedAt                        DateTime @default(now()) @db.Timestamp(6)
+  users_follows_followerIdTousers  users    @relation("follows_followerIdTousers", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_FOLLOWS__FOLLOWER_ID")
+  users_follows_followingIdTousers users    @relation("follows_followingIdTousers", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_FOLLOWS__FOLLOWING_ID")
+
+  @@id([followerId, followingId], map: "PK_FOLLOWS")
+  @@index([followerId], map: "IDX_FOLLOWS__FOLLOWER_ID")
+  @@index([followingId], map: "IDX_FOLLOWS__FOLLOWING_ID")
+}
+
+model profiles {
+  id        String   @id(map: "PK_PROFILES") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bio       String   @default("")
+  image     String   @default("") @db.VarChar(50)
+  userId    String   @unique @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PROFILES__USER_ID")
+}
+
+model tags {
+  id        String   @id(map: "PK_TAGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title     String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([title], map: "IDX_TAGS__TITLE")
+}
+
+model users {
+  id                                 String      @id(map: "PK_USERS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                           String      @db.VarChar(50)
+  email                              String      @db.VarChar(50)
+  password                           String      @db.VarChar(50)
+  createdAt                          DateTime    @default(now()) @db.Timestamp(6)
+  updatedAt                          DateTime    @default(now()) @db.Timestamp(6)
+  articles                           articles[]
+  favorites                          favorites[]
+  follows_follows_followerIdTousers  follows[]   @relation("follows_followerIdTousers")
+  follows_follows_followingIdTousers follows[]   @relation("follows_followingIdTousers")
+  profiles                           profiles?
+
+  @@unique([username, email], map: "IDX_USERS__USERNAME_USERS__EMAIL")
+  @@index([username], map: "IDX_USERS__USERNAME")
+}

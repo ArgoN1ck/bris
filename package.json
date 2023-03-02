@@ -16,7 +16,7 @@
     "serve:server": "npm run nx -- serve server",
     "__________database__________": "__________database__________",
     "migrate": "npm run flyway -- migrate",
-    "migrate:local": "set -a && . ./devops/.env.local && set +a npm run migrate",
+    "migrate:local": "set -a && . ./devops/.env.local && set +a && npm run migrate",
     "prisma:pull": "npm run -- prisma db pull && npm run prisma:generate",
     "prisma:pull:local": "set -a && . ./devops/.env.local && set +a npm run -- prisma db pull",
     "prisma:generate": "npm run -- prisma generate",

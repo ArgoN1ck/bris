@@ -6,7 +6,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { applySoftDeleteMiddleware } from './middlewares/soft-delete.middleware';
 import {
   PrismaClientConfig,
   PRISMA_CLIENT_CONFIG,
@@ -30,6 +31,7 @@ export class PrismaClientService
       },
     });
     PrismaClientService.instance = this;
+    applySoftDeleteMiddleware(this, Prisma);
   }
 
   async onModuleInit() {

@@ -12,6 +12,12 @@ else
     export PROJECT_URL=$TEST_PROJECT_URL
 fi
 
+export JEST_ARGS="--config ./tests/jest-all.json --detectOpenHandles --forceExit --passWithNoTests --reporters=default --includeConsoleOutput=true --verbose"
+
+if [ -n "$1" ]; then
+    JEST_ARGS="$JEST_ARGS $1"
+fi
+
 cd ../
-export NODE_TLS_REJECT_UNAUTHORIZED=0 && npm run jest -- --config ./tests/jest-all.json --detectOpenHandles --forceExit --passWithNoTests --reporters=default --includeConsoleOutput=true
+export NODE_TLS_REJECT_UNAUTHORIZED=0 && npm run jest -- $JEST_ARGS
 export NODE_TLS_REJECT_UNAUTHORIZED=0 && npm run test -- --config ./tests/jest-all.json --detectOpenHandles --forceExit --passWithNoTests --reporters=default --includeConsoleOutput=true

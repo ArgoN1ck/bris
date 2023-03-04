@@ -30,12 +30,10 @@ CREATE TABLE IF NOT EXISTS "Tags" (
     id uuid NOT NULL DEFAULT uuid_generate_v4 (),
     title varchar(255) NOT NULL,
     "createdAt" timestamp NOT NULL DEFAULT now(),
-    "updatedAt" timestamp NOT NULL DEFAULT now(),
-    "deletedAt" timestamp DEFAULT NULL,
     CONSTRAINT "PK_TAGS" PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS "IDX_TAGS__TITLE" ON "Tags" (title);
+CREATE UNIQUE INDEX IF NOT EXISTS "IDX_TAGS__TITLE" ON "Tags" (title);
 
 CREATE TABLE IF NOT EXISTS "Articles" (
     id uuid NOT NULL DEFAULT uuid_generate_v4 (),

@@ -78,13 +78,9 @@ model Profiles {
 }
 
 model Tags {
-  id        String    @id(map: "PK_TAGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  title     String    @db.VarChar(255)
-  createdAt DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt DateTime  @default(now()) @db.Timestamp(6)
-  deletedAt DateTime? @db.Timestamp(6)
-
-  @@index([title], map: "IDX_TAGS__TITLE")
+  id        String   @id(map: "PK_TAGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title     String   @unique(map: "IDX_TAGS__TITLE") @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
 }
 
 model Users {

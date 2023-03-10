@@ -5,86 +5,86 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { IUser } from './interfaces/user.interface';
+import { IArticle } from './interfaces/article.interface';
 import { IBaseRepository } from '../../shared/interfaces/base-repository.interface';
 import {
-  UserFindManyOptions,
-  UserFindFirstOptions,
-  UserCreateOptions,
-  UserUpdateOptions,
-  UserDeleteOptions,
-} from './types/user-options.type';
+  ArticleFindManyOptions,
+  ArticleFindFirstOptions,
+  ArticleCreateOptions,
+  ArticleUpdateOptions,
+  ArticleDeleteOptions,
+} from './types/article-options.type';
 
 @Injectable()
-export class UserRepository implements IBaseRepository<IUser> {
-  private readonly logger = new Logger(UserRepository.name);
+export class ArticleRepository implements IBaseRepository<IArticle> {
+  private readonly logger = new Logger(ArticleRepository.name);
 
   constructor(private readonly prismaClient: PrismaClientService) {}
 
-  async findMany(options?: UserFindManyOptions): Promise<IUser[]> {
-    return this.prismaClient.users.findMany(options);
+  async findMany(options?: ArticleFindManyOptions): Promise<IArticle[]> {
+    return this.prismaClient.articles.findMany(options);
   }
 
-  async findOne(options: UserFindFirstOptions): Promise<IUser> {
+  async findOne(options: ArticleFindFirstOptions): Promise<IArticle> {
     try {
-      return await this.prismaClient.users.findFirstOrThrow(options);
+      return await this.prismaClient.articles.findFirstOrThrow(options);
     } catch (err) {
       this.logger.error(err, err.stack);
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `User not found`,
+          description: `Article not found`,
         });
       }
     }
   }
 
-  async create(options: UserCreateOptions): Promise<IUser> {
+  async create(options: ArticleCreateOptions): Promise<IArticle> {
     try {
-      return await this.prismaClient.users.create(options);
+      return await this.prismaClient.articles.create(options);
     } catch (err) {
       this.logger.error(err, err.stack);
 
       if (err.code === 'P2002') {
         throw new ConflictException({
           message: 'CONFLICT',
-          description: `User with this username or email already exists`,
+          description: `Article with this title already exists`,
         });
       }
     }
   }
 
-  async update(options: UserUpdateOptions): Promise<IUser> {
+  async update(options: ArticleUpdateOptions): Promise<IArticle> {
     try {
-      return await this.prismaClient.users.update(options);
+      return await this.prismaClient.articles.update(options);
     } catch (err) {
       this.logger.error(err, err.stack);
 
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `User not found`,
+          description: `Article not found`,
         });
       }
 
       if (err.code === 'P2002') {
         throw new ConflictException({
           message: 'CONFLICT',
-          description: `User with this username or email already exists`,
+          description: `Article with this title already exists`,
         });
       }
     }
   }
 
-  async delete(options: UserDeleteOptions): Promise<IUser> {
+  async delete(options: ArticleDeleteOptions): Promise<IArticle> {
     try {
-      return await this.prismaClient.users.delete(options);
+      return await this.prismaClient.articles.delete(options);
     } catch (err) {
       this.logger.error(err, err.stack);
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `User not found`,
+          description: `Article not found`,
         });
       }
     }

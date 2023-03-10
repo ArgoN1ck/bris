@@ -2,31 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { ProfileDto } from './dtos/profile.dto';
 import { IProfile } from './interfaces/profile.interface';
 import { ProfileRepository } from './profile.repository';
+import {
+  ProfileCreateOptions,
+  ProfileDeleteOptions,
+  ProfileFindFirstOptions,
+  ProfileFindManyOptions,
+  ProfileUpdateOptions,
+} from './types/profile-options.type';
 
 @Injectable()
 export class ProfileService {
   constructor(private readonly profileRepository: ProfileRepository) {}
 
-  async createProfile(createProfileDto: ProfileDto): Promise<IProfile> {
-    return this.profileRepository.create(createProfileDto);
+  async createProfile(options: ProfileCreateOptions): Promise<IProfile> {
+    return this.profileRepository.create(options);
   }
 
-  async getProfiles(): Promise<IProfile[]> {
-    return this.profileRepository.findMany();
+  async getProfiles(options?: ProfileFindManyOptions): Promise<IProfile[]> {
+    return this.profileRepository.findMany(options);
   }
 
-  async getProfile(id: string): Promise<IProfile> {
-    return this.profileRepository.findOne(id);
+  async getProfile(options: ProfileFindFirstOptions): Promise<IProfile> {
+    return this.profileRepository.findOne(options);
   }
 
-  async updateProfile(
-    id: string,
-    updateProfileDto: ProfileDto
-  ): Promise<IProfile> {
-    return this.profileRepository.update(id, updateProfileDto);
+  async updateProfile(options: ProfileUpdateOptions): Promise<IProfile> {
+    return this.profileRepository.update(options);
   }
 
-  async deleteProfile(id: string): Promise<IProfile> {
-    return this.profileRepository.delete(id);
+  async deleteProfile(options: ProfileDeleteOptions): Promise<IProfile> {
+    return this.profileRepository.delete(options);
   }
 }

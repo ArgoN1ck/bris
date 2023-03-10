@@ -23,12 +23,18 @@ export class UserController {
 
   @Get(':id')
   async getUser(@Param() { id }: UserParamDto): Promise<IUser> {
-    return await this.userService.getUser(id);
+    return await this.userService.getUser({
+      where: { id },
+      include: { Profiles: true },
+    });
   }
 
   @Post()
   async createUser(@Body() createUserDto: UserDto): Promise<IUser> {
-    return await this.userService.createUser(createUserDto);
+    return await this.userService.createUser({
+      data: createUserDto,
+      include: { Profiles: true },
+    });
   }
 
   @Put(':id')
@@ -36,11 +42,14 @@ export class UserController {
     @Param() { id }: UserParamDto,
     @Body() updateUserDto: UserDto
   ): Promise<IUser> {
-    return await this.userService.updateUser(id, updateUserDto);
+    return await this.userService.updateUser({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   @Delete(':id')
   async deleteUser(@Param() { id }: UserParamDto): Promise<IUser> {
-    return await this.userService.deleteUser(id);
+    return await this.userService.deleteUser({ where: { id } });
   }
 }

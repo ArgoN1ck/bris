@@ -21,14 +21,20 @@ export class ProfileController {
     return await this.profileService.getProfiles();
   }
 
-  @Get(':id')
-  async getProfile(@Param() { id }: ProfileParamDto): Promise<IProfile> {
-    return await this.profileService.getProfile(id);
+  @Get(':username')
+  async getProfile(@Param() { username }: ProfileParamDto): Promise<IProfile> {
+    return await this.profileService.getProfile({
+      where: {
+        Users: { username },
+      },
+    });
   }
 
   @Post()
   async createProfile(@Body() createProfileDto: ProfileDto): Promise<IProfile> {
-    return await this.profileService.createProfile(createProfileDto);
+    return await this.profileService.createProfile({
+      data: createProfileDto,
+    });
   }
 
   @Put(':id')
@@ -36,11 +42,14 @@ export class ProfileController {
     @Param() { id }: ProfileParamDto,
     @Body() updateProfileDto: ProfileDto
   ): Promise<IProfile> {
-    return await this.profileService.updateProfile(id, updateProfileDto);
+    return await this.profileService.updateProfile({
+      where: { id },
+      data: updateProfileDto,
+    });
   }
 
   @Delete(':id')
   async deleteProfile(@Param() { id }: ProfileParamDto): Promise<IProfile> {
-    return await this.profileService.deleteProfile(id);
+    return await this.profileService.deleteProfile({ where: { id } });
   }
 }

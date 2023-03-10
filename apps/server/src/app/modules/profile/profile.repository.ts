@@ -6,87 +6,84 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IBaseRepository } from '../../shared/interfaces/base-repository.interface';
-import { ProfileDto } from './dtos/profile.dto';
 import { IProfile } from './interfaces/profile.interface';
+import {
+  ProfileCreateOptions,
+  ProfileDeleteOptions,
+  ProfileFindFirstOptions,
+  ProfileFindManyOptions,
+  ProfileUpdateOptions,
+} from './types/profile-options.type';
 @Injectable()
 export class ProfileRepository implements IBaseRepository<IProfile> {
   private readonly logger = new Logger(ProfileRepository.name);
 
   constructor(private readonly prismaClient: PrismaClientService) {}
 
-  async findMany(): Promise<IProfile[]> {
-    return this.prismaClient.profiles.findMany();
+  async findMany(options?: ProfileFindManyOptions): Promise<IProfile[]> {
+    return this.prismaClient.profiles.findMany(options);
   }
 
-  async findOne(id: string): Promise<IProfile> {
+  async findOne(options: ProfileFindFirstOptions): Promise<IProfile> {
     try {
-      return await this.prismaClient.profiles.findFirstOrThrow({
-        where: {
-          id,
-        },
-      });
+      return await this.prismaClient.profiles.findFirstOrThrow(options);
     } catch (err) {
       this.logger.error(err, err.stack);
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `Profile with id: ${id} not found`,
+          description: `Profile not found`,
         });
       }
     }
   }
 
-  async create(createProfileDto: ProfileDto): Promise<IProfile> {
+  async create(options: ProfileCreateOptions): Promise<IProfile> {
     try {
-      return await this.prismaClient.profiles.create({
-        data: { ...createProfileDto },
-      });
+      return await this.prismaClient.profiles.create(options);
     } catch (err) {
       this.logger.error(err, err.stack);
 
       if (err.code === 'P2002') {
         throw new ConflictException({
           message: 'CONFLICT',
-          description: `Profile with this title already exists`,
+          description: `Profile with for this user already exists`,
         });
       }
     }
   }
 
-  async update(id: string, updateProfileDto: ProfileDto): Promise<IProfile> {
+  async update(options: ProfileUpdateOptions): Promise<IProfile> {
     try {
-      return await this.prismaClient.profiles.update({
-        data: { ...updateProfileDto },
-        where: { id },
-      });
+      return await this.prismaClient.profiles.update(options);
     } catch (err) {
       this.logger.error(err, err.stack);
 
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `Profile with id: ${id} not found`,
+          description: `Profile not found`,
         });
       }
 
       if (err.code === 'P2002') {
         throw new ConflictException({
           message: 'CONFLICT',
-          description: `Profile with this profilename or email already exists`,
+          description: `Profile for this user already exists`,
         });
       }
     }
   }
 
-  async delete(id: string): Promise<IProfile> {
+  async delete(options: ProfileDeleteOptions): Promise<IProfile> {
     try {
-      return await this.prismaClient.profiles.delete({ where: { id } });
+      return await this.prismaClient.profiles.delete(options);
     } catch (err) {
       this.logger.error(err, err.stack);
       if (err.code === 'P2025') {
         throw new NotFoundException({
           message: 'NOT_FOUND',
-          description: `Profile with id: ${id} not found`,
+          description: `Profile not found`,
         });
       }
     }

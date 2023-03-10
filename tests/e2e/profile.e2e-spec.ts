@@ -36,9 +36,10 @@ describe('[SUCCESS] Profile (e2e)', () => {
     );
 
     const id = profile.data.id;
+    const username = user.username;
 
     const result = await axios.get(
-      `${process.env.PROJECT_URL}/api/profiles/${id}`
+      `${process.env.PROJECT_URL}/api/profiles/${username}`
     );
 
     expect(result.data).toMatchObject(createDto);
@@ -59,6 +60,7 @@ describe('[SUCCESS] Profile (e2e)', () => {
     );
 
     const id = profile.data.id;
+    const username = user.username;
 
     const updateDto = {
       userId: user.id,
@@ -69,7 +71,7 @@ describe('[SUCCESS] Profile (e2e)', () => {
     await axios.put(`${process.env.PROJECT_URL}/api/profiles/${id}`, updateDto);
 
     const result = await axios.get(
-      `${process.env.PROJECT_URL}/api/profiles/${id}`
+      `${process.env.PROJECT_URL}/api/profiles/${username}`
     );
 
     expect(result.data).toMatchObject(updateDto);
@@ -90,9 +92,10 @@ describe('[SUCCESS] Profile (e2e)', () => {
     );
 
     const id = profile.data.id;
+    const username = user.username;
 
     const result = await axios.get(
-      `${process.env.PROJECT_URL}/api/profiles/${id}`
+      `${process.env.PROJECT_URL}/api/profiles/${username}`
     );
 
     expect(result.data).toMatchObject(createDto);
@@ -113,6 +116,7 @@ describe('[SUCCESS] Profile (e2e)', () => {
     );
 
     const id = profile.data.id;
+    const username = user.username;
 
     await axios.delete(`${process.env.PROJECT_URL}/api/profiles/${id}`);
 
@@ -163,6 +167,7 @@ describe('[FAIL] Profile (e2e)', () => {
       .catch(({ response }) => expect(response.status).toEqual(409));
 
     const id = profile.data.id;
+    const username = user.username;
 
     await axios.delete(`${process.env.PROJECT_URL}/api/profiles/${id}`);
   });
@@ -180,6 +185,7 @@ describe('[FAIL] Profile (e2e)', () => {
     );
 
     const id = profile.data.id;
+    const username = user.username;
 
     await axios.delete(`${process.env.PROJECT_URL}/api/profiles/${id}`);
 

@@ -1,80 +1,83 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS "Users" (
     id uuid NOT NULL DEFAULT uuid_generate_v4 (),
-    username varchar(50) NOT NULL,
-    email varchar(50) NOT NULL,
-    password VARCHAR(50) NOT NULL,
+    username varchar(100) NOT NULL,
+    email varchar(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     "createdAt" timestamp NOT NULL DEFAULT now(),
     "updatedAt" timestamp NOT NULL DEFAULT now(),
+    "deletedAt" timestamp DEFAULT NULL,
     CONSTRAINT "PK_USERS" PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS "IDX_USERS__USERNAME" ON users (username);
+CREATE UNIQUE INDEX IF NOT EXISTS "IDX_USERS__USERNAME" ON "Users" (username);
 
-CREATE UNIQUE INDEX IF NOT EXISTS "IDX_USERS__USERNAME_USERS__EMAIL" ON users (username, email);
+CREATE UNIQUE INDEX IF NOT EXISTS "IDX_USERS__EMAIL" ON "Users" (email);
 
-CREATE TABLE IF NOT EXISTS profiles (
+CREATE TABLE IF NOT EXISTS "Profiles" (
     id uuid NOT NULL DEFAULT uuid_generate_v4 (),
     bio text NOT NULL DEFAULT '',
-    image varchar(50) NOT NULL DEFAULT '',
-    "userId" uuid UNIQUE NOT NULL,
+    image varchar(255) NOT NULL DEFAULT '',
+    "userId" uuid NOT NULL,
     "createdAt" timestamp NOT NULL DEFAULT now(),
     "updatedAt" timestamp NOT NULL DEFAULT now(),
+    "deletedAt" timestamp DEFAULT NULL,
     CONSTRAINT "PK_PROFILES" PRIMARY KEY (id),
-    CONSTRAINT "FK_PROFILES__USER_ID" FOREIGN KEY ("userId") REFERENCES users ON DELETE CASCADE
+    CONSTRAINT "FK_PROFILES__USER_ID" FOREIGN KEY ("userId") REFERENCES "Users" ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS tags (
-    id uuid NOT NULL DEFAULT uuid_generate_v4 (),
-    title varchar(50) NOT NULL,
-    "createdAt" timestamp NOT NULL DEFAULT now(),
-    "updatedAt" timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT "PK_TAGS" PRIMARY KEY (id)
-);
+CREATE UNIQUE INDEX IF NOT EXISTS "IDX_PROFILES__USERID" ON "Profiles" ("userId");
 
-CREATE INDEX IF NOT EXISTS "IDX_TAGS__TITLE" ON tags (title);
-
-CREATE TABLE IF NOT EXISTS articles (
+CREATE TABLE IF NOT EXISTS "Articles" (
     id uuid NOT NULL DEFAULT uuid_generate_v4 (),
-    title varchar(50) NOT NULL,
+    slug varchar(255) NOT NULL,
+    title varchar(255) NOT NULL,
     description text NOT NULL DEFAULT '',
     body text NOT NULL DEFAULT '',
     "favoritesCount" integer NOT NULL DEFAULT 0,
     "authorId" uuid,
     "createdAt" timestamp NOT NULL DEFAULT now(),
     "updatedAt" timestamp NOT NULL DEFAULT now(),
+    "deletedAt" timestamp DEFAULT NULL,
     CONSTRAINT "PK_ARTICLES" PRIMARY KEY (id),
-    CONSTRAINT "FK_ARTICLES__AUTHOR_ID" FOREIGN KEY ("authorId") REFERENCES users ON DELETE SET NULL
+    CONSTRAINT "FK_ARTICLES__AUTHOR_ID" FOREIGN KEY ("authorId") REFERENCES "Profiles" ON DELETE SET NULL
 );
 
-CREATE INDEX IF NOT EXISTS "IDX_ARTICLES__TITLE" ON articles (title);
+CREATE INDEX IF NOT EXISTS "IDX_ARTICLES__TITLE" ON "Articles" (title);
+CREATE UNIQUE INDEX IF NOT EXISTS "IDX_ARTICLES__SLUG" ON "Articles" (slug);
 
-CREATE TABLE IF NOT EXISTS favorites (
-    "userId" uuid NOT NULL,
+CREATE TABLE IF NOT EXISTS "Comments" (
+    id uuid NOT NULL DEFAULT uuid_generate_v4 (),
+    body text NOT NULL,
+    "articleId" uuid NOT NULL,
+    "authorId" uuid NOT NULL,
+    "createdAt" timestamp NOT NULL DEFAULT now(),
+    "updatedAt" timestamp NOT NULL DEFAULT now(),
+    "deletedAt" timestamp DEFAULT NULL,
+    CONSTRAINT "PK_COMMENTS" PRIMARY KEY (id),
+    CONSTRAINT "FK_COMMENTS__ARTICLE_ID" FOREIGN KEY ("articleId") REFERENCES "Articles" ON DELETE CASCADE,
+    CONSTRAINT "FK_COMMENTS__AUTHOR_ID" FOREIGN KEY ("authorId") REFERENCES "Profiles" ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "Favorites" (
+    "profileId" uuid NOT NULL,
     "articleId" uuid NOT NULL,
     "createdAt" timestamp NOT NULL DEFAULT now(),
-    "updatedAt" timestamp NOT NULL DEFAULT now(),
-    CONSTRAINT "PK_FAVORITES" PRIMARY KEY ("userId", "articleId"),
-    CONSTRAINT "FK_FAVORITES__USER_ID" FOREIGN KEY ("userId") REFERENCES users ON DELETE CASCADE,
-    CONSTRAINT "FK_FAVORITES__ARTICLE_ID" FOREIGN KEY ("articleId") REFERENCES articles ON DELETE CASCADE
+    CONSTRAINT "PK_FAVORITES" PRIMARY KEY ("profileId", "articleId"),
+    CONSTRAINT "FK_FAVORITES__PROFILE_ID" FOREIGN KEY ("profileId") REFERENCES "Profiles" ON DELETE CASCADE,
+    CONSTRAINT "FK_FAVORITES__ARTICLE_ID" FOREIGN KEY ("articleId") REFERENCES "Articles" ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS "IDX_FAVORITES__USER_ID" ON favorites ("userId");
+CREATE INDEX IF NOT EXISTS "IDX_FAVORITES__PROFILE_ID" ON "Favorites" ("profileId");
 
-CREATE INDEX IF NOT EXISTS "IDX_FAVORITES__ARTICLE_ID" ON favorites ("articleId");
+CREATE INDEX IF NOT EXISTS "IDX_FAVORITES__ARTICLE_ID" ON "Favorites" ("articleId");
 
-CREATE TABLE IF NOT EXISTS follows (
+CREATE TABLE IF NOT EXISTS "Follows" (
     "followerId" uuid NOT NULL,
     "followingId" uuid NOT NULL,
-    "createdAt" timestamp NOT NULL DEFAULT now(),
-    "updatedAt" timestamp NOT NULL DEFAULT now(),
     CONSTRAINT "PK_FOLLOWS" PRIMARY KEY ("followerId", "followingId"),
-    CONSTRAINT "FK_FOLLOWS__FOLLOWER_ID" FOREIGN KEY ("followerId") REFERENCES users ON DELETE CASCADE,
-    CONSTRAINT "FK_FOLLOWS__FOLLOWING_ID" FOREIGN KEY ("followingId") REFERENCES users ON DELETE CASCADE
+    CONSTRAINT "FK_FOLLOWS__FOLLOWER_ID" FOREIGN KEY ("followerId") REFERENCES "Profiles",
+    CONSTRAINT "FK_FOLLOWS__FOLLOWING_ID" FOREIGN KEY ("followingId") REFERENCES "Profiles"
 );
-
-CREATE INDEX IF NOT EXISTS "IDX_FOLLOWS__FOLLOWER_ID" ON follows ("followerId");
-
-CREATE INDEX IF NOT EXISTS "IDX_FOLLOWS__FOLLOWING_ID" ON follows ("followingId");
 

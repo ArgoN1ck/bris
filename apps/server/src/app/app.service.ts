@@ -5,6 +5,6 @@ import { PrismaClientService } from '@bris/prisma/server';
 export class AppService {
   constructor(private prismaClient: PrismaClientService) {}
   getData() {
-    return {status: 'OK'};
+    return { status: 'OK' };
   }
 }
